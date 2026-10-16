@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador y Guía de Pinturas Navales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col">
+
+    <!-- Header Naval -->
+    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <i class="fa-solid fa-ship text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">NavalPaint Analyzer</h1>
+                    <p class="text-xs text-slate-400">Identificación y Guía de Preparación de Recubrimientos</p>
+                </div>
+            </div>
+            <span class="text-xs bg-blue-900/60 text-blue-300 px-3 py-1 rounded-full border border-blue-700">Versión Local 1.0</span>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- Zona de Carga de Imagen -->
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+            <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-camera text-blue-400"></i> Cargar Imagen de la Pintura o Etiqueta
+            </h2>
+            <p class="text-sm text-slate-400 mb-4">Sube una foto de la lata de pintura, etiqueta o ficha técnica para identificar sus especificaciones de preparación y aplicación.</p>
+            
+            <div id="drop-zone" class="border-2 border-dashed border-slate-600 hover:border-blue-500 rounded-xl p-8 text-center cursor-pointer transition bg-slate-900/50 flex flex-col items-center justify-center">
+                <i class="fa-solid fa-cloud-arrow-up text-4xl text-blue-400 mb-3"></i>
+                <p class="text-sm font-medium text-slate-200">Arrastra tu imagen aquí o <span class="text-blue-400 underline">haz clic para buscar</span></p>
+                <p class="text-xs text-slate-500 mt-1">Soporta JPG, PNG, WEBP</p>
+                <input type="file" id="file-input" accept="image/*" class="hidden">
+            </div>
+
+            <!-- Vista Previa de la Imagen -->
+            <div id="preview-container" class="mt-4 hidden flex items-center gap-4 bg-slate-900 p-3 rounded-xl border border-slate-700">
+                <img id="image-preview" src="#" alt="Vista previa" class="w-20 h-20 object-cover rounded-lg border border-slate-600">
+                <div class="flex-grow">
+                    <p id="file-name" class="text-sm font-medium text-slate-200 truncate"></p>
+                    <p class="text-xs text-emerald-400 mt-1"><i class="fa-solid fa-check-circle"></i> Imagen cargada con éxito</p>
+                </div>
+                <button onclick="analizarImagen()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Analizar Pintura
+                </button>
+            </div>
+        </div>
+
+        <!-- Resultados del Análisis -->
+        <div id="results-section" class="space-y-6 hidden">
+            
+            <!-- Tarjeta de Identificación -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span id="res-categoria" class="text-xs bg-indigo-900 text-indigo-300 px-3 py-1 rounded-full font-semibold">Epóxico de Dos Componentes</span>
+                        <h3 id="res-nombre" class="text-2xl font-bold mt-2 text-white">Intershield 300 (Anticorrosivo Reforzado)</h3>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 block">Sólidos en Volumen</span>
+                        <span id="res-solidos" class="text-lg font-bold text-emerald-400">65% ± 2%</span>
+                    </div>
+                </div>
+                <p id="res-descripcion" class="text-sm text-slate-300 leading-relaxed">
+                    Recubrimiento epóxico de alta resistencia con escamas de vidrio, diseñado para protección contra la corrosión en obra viva, obra muerta y tanques de lastre en buques.
+                </p>
+            </div>
+
+            <!-- Guía de Preparación de Superficie -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-blue-400">
+                    <i class="fa-solid fa-brush"></i> 1. Preparación de la Superficie
+                </h3>
+                <div class="grid md:grid-cols-2 gap-4 text-sm">
+                    <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Estándar Requerido (SSPC / ISO)</span>
+                        <p id="res-prep-estandar" class="font-semibold text-slate-100">SSPC-SP 10 / ISO Sa 2½ (Chorro de abrasivo cercano al metal blanco)</p>
+                    </div>
+                    <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Perfil de Rugosidad (Ancla)</span>
+                        <p id="res-prep-rugosidad" class="font-semibold text-slate-100">50 - 75 micras ($\mu m$)</p>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-3"><i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Nota: La superficie debe estar completamente libre de grasa, aceite, sales solubles y humedad antes de aplicar.</p>
+            </div>
+
+            <!-- Guía de Preparación y Mezcla -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-amber-400">
+                    <i class="fa-solid fa-flask"></i> 2. Preparación y Mezcla de la Pintura
+                </h3>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Relación de Mezcla</span>
+                        <p id="res-mezcla-rel" class="font-semibold text-slate-100">4 Partes Base : 1 Parte Cura (en volumen)</p>
+                    </div>
+                    <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Tiempo de Inducción</span>
+                        <p id="res-mezcla-ind" class="font-semibold text-slate-100">15 minutos a 25°C</p>
+                    </div>
+                    <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Vida Útil (Pot Life)</span>
+                        <p id="res-mezcla-vida" class="font-semibold text-slate-100">4 horas (a 25°C)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guía de Aplicación y Uso -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-emerald-400">
+                    <i class="fa-solid fa-spray-can"></i> 3. Métodos de Aplicación y Uso
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <span class="font-semibold text-slate-200 block">Equipo Airless (Recomendado)</span>
+                            <span class="text-xs text-slate-400">Presión de boquilla: 2,500 - 3,000 psi | Boquilla: 0.019" - 0.023"</span>
+                        </div>
+                        <span class="bg-emerald-900/60 text-emerald-300 text-xs px-2.5 py-1 rounded-md border border-emerald-700">Ideal</span>
+                    </div>
+                    <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <span class="font-semibold text-slate-200 block">Brocha / Rodillo</span>
+                            <span class="text-xs text-slate-400">Solo para pequeños reductos, cordones de soldadura o retoques.</span>
+                        </div>
+                        <span class="bg-slate-700 text-slate-300 text-xs px-2.5 py-1 rounded-md">Retoques</span>
+                    </div>
+                    <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Diluyente Sugerido</span>
+                        <p id="res-diluyente" class="font-semibold text-slate-100">International GTA220 (Máximo 5% en volumen si es necesario)</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Script de interacción -->
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const previewContainer = document.getElementById('preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const fileName = document.getElementById('file-name');
+        const resultsSection = document.getElementById('results-section');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                mostrarArchivo(e.target.files[0]);
+            }
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-blue-500', 'bg-slate-800');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-blue-500', 'bg-slate-800');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-500', 'bg-slate-800');
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                mostrarArchivo(e.dataTransfer.files[0]);
+            }
+        });
+
+        function mostrarArchivo(file) {
+            fileName.textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function analizarImagen() {
+            // Simulando el análisis inteligente de la etiqueta de pintura naval
+            resultsSection.classList.remove('hidden');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
